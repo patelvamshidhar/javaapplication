@@ -2,37 +2,61 @@ pipeline {
     agent any
 
     stages {
+        stage('Install Tools') {
+            steps {
+                sh 'sudo apt-get update'
+                sh 'sudo apt-get install -y docker.io'
+            }
+        }
         stage('Install npm') {
             steps {
-                sh 'curl -sL https://deb.nodesource.com/setup_14.x | sudo -E bash -'
-                sh 'sudo apt-get install -y nodejs'
+                script {
+                    docker.image('node:14').inside {
+                        sh 'npm --version'
+                    }
+                }
             }
         }
         stage('Install Maven') {
             steps {
-                sh 'sudo apt-get update'
-                sh 'sudo apt-get install -y maven'
+                script {
+                    docker.image('maven:3.6.3-jdk-11').inside {
+                        sh 'mvn --version'
+                    }
+                }
             }
         }
-        stage('Compile Java') {
+        stage('Build Java') {
             steps {
-                sh 'javac HelloWorld.java'
+                script {
+                    docker.image('maven:3.6.3-jdk-11').inside {
+                        writeFile file: 'HelloWorld.java', text: '''
+                        public class HelloWorld {
+                            public static void main(String[] args) {
+                                System.out.println("Hello, World!");
+                            }
+                        }
+                        '''
+                        sh 'javac HelloWorld.java'
+                    }
+                }
             }
         }
-        stage('Run Java') {
+        stage('Deploy') {
             steps {
-                sh 'java HelloWorld'
-            }
-        }
-        stage('Run npm') {
-            steps {
-                sh 'npm --version'
-            }
-        }
-        stage('Run Maven') {
-            steps {
-                sh 'mvn --version'
+                script {
+                    docker.image('node:14').inside {
+                        writeFile file: 'index.html', text: '''
+                        <html>
+                        <body>
+                            <h1>Hello, World!</h1>
+                        </body>
+                        </html>
+                        '''
+                        sh 'npm install -g http-server'
+                        sh 'http-server -p 8081'
+                    }
+                }
             }
         }
     }
-}
