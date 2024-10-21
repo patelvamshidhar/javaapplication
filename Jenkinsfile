@@ -1,13 +1,6 @@
 pipeline {
     agent any
-
-    stages {
-        stage('Install Tools') {
-            steps {
-                sh 'sudo apt-get update'
-                sh 'sudo apt-get install -y docker.io'
-            }
-        }
+    
         stage('Install npm') {
             steps {
                 script {
