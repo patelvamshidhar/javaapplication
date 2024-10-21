@@ -5,7 +5,7 @@ pipeline {
         stage('Install npm') {
             steps {
                 script {
-                    docker.image('node:14').inside {
+                    docker.image('node:latest').inside {
                         sh 'npm --version'
                     }
                 }
