@@ -48,7 +48,7 @@ pipeline {
                         </html>
                         '''
                         sh 'npm install -g http-server'
-                        sh 'http-server -p 8081'
+                        sh 'http-server -p 8080'
                     }
                 }
             }
